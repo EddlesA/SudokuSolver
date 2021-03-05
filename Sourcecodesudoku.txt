@@ -1,0 +1,977 @@
+dim grid(3,3,3,3,9) as integer
+   'grid(X,Y,XX,YY,POSS)
+   'origin top left corner
+dim BX as integer
+dim BY as integer
+dim BBX as integer
+dim BBY as integer
+
+dim fail as integer
+dim EBX as integer
+dim EBY as integer
+dim EBBX as integer
+dim EBBY as integer
+
+dim CBX as integer
+dim CBY as integer
+dim CBBX as integer
+dim CBBY as integer
+
+dim co1 as string
+dim co2 as string
+dim cco1 as string
+dim cco2 as string
+dim occur(9,9,2) as integer
+dim count(9) as integer
+dim paircount as integer
+dim matching as integer
+dim ran as integer
+dim answercount as integer
+dim numcount as integer
+dim notalone as integer
+dim curnum as integer
+dim inital as integer
+dim poss as integer
+dim cposs as integer
+dim eposs as integer
+dim answ as integer
+dim h as integer
+dim i as integer
+dim k as integer
+dim running as integer
+
+dim tboxcode(9) as string
+
+dim zerocount as integer
+
+dim box as string
+dim udev as integer
+
+i = 1
+tboxcode(1)="006900000"
+tboxcode(2)="080000679"
+tboxcode(3)="307000005"
+tboxcode(4)="060000180"
+tboxcode(5)="200000005"
+tboxcode(6)="073000060"
+tboxcode(7)="400000609"
+tboxcode(8)="812000040"
+tboxcode(9)="000004200"
+
+'setup pairs
+'setup board
+for BY = 1 to 3
+    for BBY = 1 to 3
+        for BX = 1 to 3
+            for BBX = 1 to 3
+                for poss = 0 to 9
+                    grid(BX,BY,BBX,BBY,poss) = poss
+                next poss
+            next BBX
+        next BX
+    next BBY
+Next BY
+
+print "if you want dev mode press 1, if not enter any number"
+input Udev
+k=0
+if udev <> 1 then
+    print "box codes go from top left to bottom right, each box code is 9 digits."
+    print "here is an example"
+    print "   |   |   ||"
+    print "   | 4 |   ||"
+    print " 1 | 2 | 5 ||"
+    print "assume this is the top left box in a sudoku 3x3 grid"
+    print "the box code for this box would be 000040125"
+    print "each box code is 9 characters long, if input correctly a grid matching the one you input will be displayed upon entry of the 9th box code"
+    
+'input board
+for BY = 1 to 3
+    for BX = 1 to 3
+        i = 0-3
+        k=k+1
+        print "input box code for box" "(";BX;",";BY;")"
+        input box
+        for BBY = 1 to 3
+            i = i+3
+            for BBX = 1 to 3
+                h = valint(Mid(box,bbx+i,1))
+                if h <> 0 then
+                    grid(BX,BY,BBX,BBY,0) = h
+                    for poss = 1 to 9
+                        grid(BX,BY,BBX,BBY,poss) = 0
+                    next poss
+                end if
+                if h = 0 then
+                    
+                end if
+            next BBX
+        next BBy
+    next BX
+Next BY
+end if
+
+if udev = 1 then
+k=0
+'input board
+for BY = 1 to 3
+    for BX = 1 to 3
+        i = 0-3
+        k=k+1
+        print "input box code for box" "(";BX;",";BY;")"
+       'input box
+        box = tboxcode(k)
+        for BBY = 1 to 3
+            i = i+3
+            for BBX = 1 to 3
+                h = valint(Mid(box,bbx+i,1))
+                if h <> 0 then
+                    grid(BX,BY,BBX,BBY,0) = h
+                    for poss = 1 to 9
+                        grid(BX,BY,BBX,BBY,poss) = 0
+                    next poss
+                end if
+                if h = 0 then
+                    
+                end if
+            next BBX
+        next BBy
+    next BX
+Next BY
+udev = 0
+end if
+
+'printing board
+for BY = 1 to 3
+    for BBY = 1 to 3
+        for BX = 1 to 3        
+            for BBX = 1 to 3
+                if grid(BX,BY,BBX,BBY,0) = 0 then
+                    print "  ";
+                end if
+                if grid(bX,bY,bbX,bbY,0) <> 0 then
+                    for poss = 0 to 9
+                        if grid(BX,BY,BBX,BBY,poss) <> 0 then
+                            print grid(BX,BY,BBX,BBY,poss);
+                        end if 
+                    next poss
+                end if
+                print " |";
+            next BBX
+            print "| ";
+        next BX
+        print ""
+    next BBY
+    print "---------------------------"
+Next BY
+
+sleep
+running = 1
+while running = 1
+    'print "running"
+    for BY = 1 to 3
+        for BBY = 1 to 3
+            for BX = 1 to 3
+                for BBX = 1 to 3
+                    h = grid(BX,BY,BBX,BBY,0)
+                    if h = 0 then
+                        for CBX = 1 to 3 'checking row
+                            for CBBX = 1 to 3
+                                if grid(CBX, BY, CBBX, BBY, 0) <> 0 then
+                                    i = grid(CBX, BY, CBBX, BBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                end if
+                            next cbbx
+                        next cbx
+                        for CBy = 1 to 3 'checking column
+                            for CBBy = 1 to 3
+                                if grid(BX, cBY, BBX, cBBY, 0) <> 0 then
+                                    i = grid(BX, cBY, BBX, cBBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                end if
+                            next cbby
+                        next cby
+                        For CBBX = 1 to 3 'checking box
+                            for CBBY = 1 to 3
+                                if grid(BX, BY, CBBX, CBBY, 0) <> 0 then
+                                    i = grid(BX, BY, CBBX, CBBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                end if
+                            next CBBY
+                        Next CBBX
+                    End if
+                next BBX
+            next BX
+        next BBY
+    Next BY
+    
+    for BY = 1 to 3 'check for only possible
+        for BBY = 1 to 3
+            for BX = 1 to 3
+                for BBX = 1 to 3
+                    if grid(bx,by,bbx,bby,0) = 0 then 
+                        for poss = 1 to 9 'row
+                            notalone = 0
+                            if grid(bx,by,bbx,bby,poss) <> 0 then
+                                Curnum = grid(bx,by,bbx,bby,poss)
+                                for cBX = 1 to 3
+                                    for cbbx = 1 to 3
+                                        if grid(cbx,by,cbbx,bby,poss) <> 0 then
+                                            if cbx <> bx or cbbx <> bbx then
+                                                if grid(cbx,by,cbbx,bby,poss) = curnum then
+                                                    notalone = 1
+                                                end if
+                                            end if
+                                        end if
+                                    next cbbx
+                                next cbx
+                                if notalone <> 1 then
+                                    notalone = 0
+                                    grid(bx,by,bbx,bby,0) = curnum
+                                    for cposs = 1 to 9
+                                        grid(bx,by,bbx,bby,cposs) = 0
+                                    next cposs
+                                end if
+                            end if
+                        next poss
+                    end if
+                next BBX
+            next BX
+        next BBY
+    Next BY
+    
+    for BY = 1 to 3
+        for BBY = 1 to 3
+            for BX = 1 to 3
+                for BBX = 1 to 3
+                    h = grid(BX,BY,BBX,BBY,0)
+                    if h <> 0 then
+                        'print "h <> 0"
+                    end if
+                    if h = 0 then
+                        'print "h=0"
+                        'row check
+                        for CBX = 1 to 3 'checking row
+                            for CBBX = 1 to 3
+                                if grid(CBX, BY, CBBX, BBY, 0) <> 0 then
+                                    i = grid(CBX, BY, CBBX, BBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                    'print bx,by,bbx,bby, i,""
+                                end if
+                            next cbbx
+                        next cbx
+                        for CBy = 1 to 3 'checking column
+                            for CBBy = 1 to 3
+                                if grid(BX, cBY, BBX, cBBY, 0) <> 0 then
+                                    i = grid(BX, cBY, BBX, cBBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                    'print bx,by,bbx,bby, i,""
+                                end if
+                            next cbby
+                        next cby
+                        For CBBX = 1 to 3 'checking box
+                            for CBBY = 1 to 3
+                                if grid(BX, BY, CBBX, CBBY, 0) <> 0 then
+                                    i = grid(BX, BY, CBBX, CBBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                    'print bx,by,bbx,bby, i,""
+                                end if
+                            next CBBY
+                        Next CBBX
+                    End if
+                next BBX
+            next BX
+        next BBY
+    Next BY
+    
+    for BY = 1 to 3 'check for only possible
+        for BBY = 1 to 3
+            for BX = 1 to 3
+                for BBX = 1 to 3
+                    if grid(bx,by,bbx,bby,0) = 0 then
+                        for poss = 1 to 9 'col
+                            notalone = 0
+                            if grid(bx,by,bbx,bby,poss) <> 0 then
+                                Curnum = grid(bx,by,bbx,bby,poss)
+                                for cBy = 1 to 3
+                                    for cbby = 1 to 3
+                                        if grid(bx,cby,bbx,cbby,poss) <> 0 then
+                                            if cby <> by or cbby <> bby then
+                                                if grid(bx,cby,bbx,cbby,poss) = curnum then
+                                                    notalone = 1
+                                                end if
+                                            end if
+                                        end if
+                                    next cbby
+                                next cby
+                                if notalone <> 1 then
+                                    notalone = 0
+                                    grid(bx,by,bbx,bby,0) = curnum
+                                    for cposs = 1 to 9
+                                        grid(bx,by,bbx,bby,cposs) = 0
+                                    next cposs
+                                end if
+                            end if
+                        next poss
+                    end if
+                next BBX
+            next BX
+        next BBY
+    Next BY
+    
+    for BY = 1 to 3
+        for BBY = 1 to 3
+            for BX = 1 to 3
+                for BBX = 1 to 3
+                    h = grid(BX,BY,BBX,BBY,0)
+                    if h <> 0 then
+                        'print "h <> 0"
+                    end if
+                    if h = 0 then
+                        'print "h=0"
+                        'row check
+                        for CBX = 1 to 3 'checking row
+                            for CBBX = 1 to 3
+                                if grid(CBX, BY, CBBX, BBY, 0) <> 0 then
+                                    i = grid(CBX, BY, CBBX, BBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                    'print bx,by,bbx,bby, i,""
+                                end if
+                            next cbbx
+                        next cbx
+                        for CBy = 1 to 3 'checking column
+                            for CBBy = 1 to 3
+                                if grid(BX, cBY, BBX, cBBY, 0) <> 0 then
+                                    i = grid(BX, cBY, BBX, cBBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                    'print bx,by,bbx,bby, i,""
+                                end if
+                            next cbby
+                        next cby
+                        For CBBX = 1 to 3 'checking box
+                            for CBBY = 1 to 3
+                                if grid(BX, BY, CBBX, CBBY, 0) <> 0 then
+                                    i = grid(BX, BY, CBBX, CBBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                    'print bx,by,bbx,bby, i,""
+                                end if
+                            next CBBY
+                        Next CBBX
+                    End if
+                next BBX
+            next BX
+        next BBY
+    Next BY
+    
+    for BY = 1 to 3 'check for only possible
+        for bx = 1 to 3
+            for Bby = 1 to 3
+                for BBX = 1 to 3
+                    if grid(bx,by,bbx,bby,0) = 0 then
+                        for poss = 1 to 9 'box
+                            notalone = 0
+                            if grid(bx,by,bbx,bby,poss) <> 0 then
+                                Curnum = grid(bx,by,bbx,bby,poss)
+                                for cbbx = 1 to 3
+                                    for cbby = 1 to 3
+                                        if grid(bx,by,cbbx,cbby,poss) <> 0 then
+                                            if cbbx <> bbx or cbby <> bby then
+                                                if grid(bx,by,cbbx,cbby,poss) = curnum then
+                                                    notalone = 1
+                                                end if
+                                            end if
+                                        end if
+                                    next cbby
+                                next cbbx
+                                if notalone <> 1 then
+                                    notalone = 0
+                                    grid(bx,by,bbx,bby,0) = curnum
+                                    for cposs = 1 to 9
+                                        grid(bx,by,bbx,bby,cposs) = 0
+                                    next cposs
+                                end if
+                            end if
+                        next poss
+                    end if
+                next BBX
+            next Bby
+        next bx
+    Next BY
+    
+    for BY = 1 to 3
+        for BBY = 1 to 3
+            for BX = 1 to 3
+                for BBX = 1 to 3
+                    if grid(bx,by,bbx,bby,0) = 0 then
+                        'col inferring from box
+                        for poss = 1 to 9
+                            fail = 0
+                            if grid(bx,by,bbx,bby,poss) <> 0 then
+                                h = grid(bx,by,bbx,bby,poss)
+                                for cbbx = 1 to 3
+                                    for cbby = 1 to 3
+                                        if cbbx <> bbx then
+                                            if h = grid(bx,by,cbbx,cbby,poss) then
+                                                fail = 1
+                                            end if
+                                        end if
+                                    next cbby
+                                next cbbx
+                                if fail = 0 then
+                                    for cby = 1 to 3
+                                        for cbby = 1 to 3
+                                            if cby <> by then
+                                                grid(bx,cby,bbx,cbby,poss) = 0
+                                            end if
+                                        next cbby
+                                    next cby
+                                end if
+                            end if
+                        next poss
+                    end if
+                next bbx
+            next bx
+        next bby
+    next by
+    
+    for BY = 1 to 3
+        for BBY = 1 to 3
+            for BX = 1 to 3
+                for BBX = 1 to 3
+                    h = grid(BX,BY,BBX,BBY,0)
+                    if h <> 0 then
+                        'print "h <> 0"
+                    end if
+                    if h = 0 then
+                        'print "h=0"
+                        'row check
+                        for CBX = 1 to 3 'checking row
+                            for CBBX = 1 to 3
+                                if grid(CBX, BY, CBBX, BBY, 0) <> 0 then
+                                    i = grid(CBX, BY, CBBX, BBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                    'print bx,by,bbx,bby, i,""
+                                end if
+                            next cbbx
+                        next cbx
+                        for CBy = 1 to 3 'checking column
+                            for CBBy = 1 to 3
+                                if grid(BX, cBY, BBX, cBBY, 0) <> 0 then
+                                    i = grid(BX, cBY, BBX, cBBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                    'print bx,by,bbx,bby, i,""
+                                end if
+                            next cbby
+                        next cby
+                        For CBBX = 1 to 3 'checking box
+                            for CBBY = 1 to 3
+                                if grid(BX, BY, CBBX, CBBY, 0) <> 0 then
+                                    i = grid(BX, BY, CBBX, CBBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                    'print bx,by,bbx,bby, i,""
+                                end if
+                            next CBBY
+                        Next CBBX
+                    End if
+                next BBX
+            next BX
+        next BBY
+    Next BY
+
+    
+    for BY = 1 to 3
+        for BBY = 1 to 3
+            for BX = 1 to 3
+                for BBX = 1 to 3
+                    if grid(bx,by,bbx,bby,0) = 0 then
+                        'row inferring from box
+                        for poss = 1 to 9
+                            fail = 0
+                            if grid(bx,by,bbx,bby,poss) <> 0 then
+                                h = grid(bx,by,bbx,bby,poss)
+                                for cbbx = 1 to 3 '534 535 contains to box
+                                    for cbby = 1 to 3 
+                                        if cbby <> bby then 'prevents same row
+                                            if h = grid(bx,by,cbbx,cbby,poss) then
+                                                fail = 1
+                                            end if
+                                        end if
+                                    next cbby
+                                next cbbx
+                                if fail = 0 then
+                                    for cbx = 1 to 3
+                                        for cbbx = 1 to 3
+                                            if cbx <> bx then 'prevents deletion from row
+                                                grid(cbx,by,cbbx,bby,poss) = 0
+                                            end if
+                                        next cbbx
+                                    next cbx
+                                end if
+                            end if
+                        next poss
+                    end if
+                next bbx
+            next bx
+        next bby
+    next by
+    
+       for BY = 1 to 3
+        for BBY = 1 to 3
+            for BX = 1 to 3
+                for BBX = 1 to 3
+                    h = grid(BX,BY,BBX,BBY,0)
+                    if h <> 0 then
+                        'print "h <> 0"
+                    end if
+                    if h = 0 then
+                        'print "h=0"
+                        'row check
+                        for CBX = 1 to 3 'checking row
+                            for CBBX = 1 to 3
+                                if grid(CBX, BY, CBBX, BBY, 0) <> 0 then
+                                    i = grid(CBX, BY, CBBX, BBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                    'print bx,by,bbx,bby, i,""
+                                end if
+                            next cbbx
+                        next cbx
+                        for CBy = 1 to 3 'checking column
+                            for CBBy = 1 to 3
+                                if grid(BX, cBY, BBX, cBBY, 0) <> 0 then
+                                    i = grid(BX, cBY, BBX, cBBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                    'print bx,by,bbx,bby, i,""
+                                end if
+                            next cbby
+                        next cby
+                        For CBBX = 1 to 3 'checking box
+                            for CBBY = 1 to 3
+                                if grid(BX, BY, CBBX, CBBY, 0) <> 0 then
+                                    i = grid(BX, BY, CBBX, CBBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                    'print bx,by,bbx,bby, i,""
+                                end if
+                            next CBBY
+                        Next CBBX
+                    End if
+                next BBX
+            next BX
+        next BBY
+    Next BY
+    
+    
+    for by = 1 to 3 'PAIRS BOX
+        for bx = 1 to 3
+            erase occur
+            for poss = 1 to 9
+                i = 1
+                for bby = 1 to 3
+                    for bbx = 1 to 3
+                        if grid(BX,BY,BBX,BBY,poss) <> 0 then
+                            occur(poss,i,1) = bbx
+                            occur(poss,i,2) = bby
+                            count(poss) = i
+                            i = i + 1
+                        end if
+                    next bbx
+                next bby
+            next poss
+            for poss = 1 to 9
+                if count(poss) = 2 then
+                    co1 = occur(poss,1,1) & occur(poss,1,2)
+                    co2 = occur(poss,2,1) & occur(poss,2,2)
+                    for cposs = 1 to 9
+                        if cposs <> poss then
+                            if count(cposs) = 2 then
+                                cco1 = occur(cposs,1,1) & occur(cposs,1,2)
+                                cco2 = occur(cposs,2,1) & occur(cposs,2,2)
+                                if co1 = cco1 and co2 = cco2  then
+                                    for eposs = 1 to 9
+                                        if eposs <> poss and eposs <> cposs then
+                                            grid(Bx,by,occur(cposs,1,1),occur(cposs,1,2),eposs) = 0
+                                            grid(Bx,by,occur(cposs,2,1),occur(cposs,2,2),eposs) = 0
+                                        end if
+                                    next eposs
+                                end if
+                            end if
+                        end if
+                    next cposs
+                end if
+            next poss
+        next bx
+    next by
+    
+    for BY = 1 to 3
+        for BBY = 1 to 3
+            for BX = 1 to 3
+                for BBX = 1 to 3
+                    h = grid(BX,BY,BBX,BBY,0)
+                    if h <> 0 then
+                        'print "h <> 0"
+                    end if
+                    if h = 0 then
+                        'print "h=0"
+                        'row check
+                        for CBX = 1 to 3 'checking row
+                            for CBBX = 1 to 3
+                                if grid(CBX, BY, CBBX, BBY, 0) <> 0 then
+                                    i = grid(CBX, BY, CBBX, BBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                    'print bx,by,bbx,bby, i,""
+                                end if
+                            next cbbx
+                        next cbx
+                        for CBy = 1 to 3 'checking column
+                            for CBBy = 1 to 3
+                                if grid(BX, cBY, BBX, cBBY, 0) <> 0 then
+                                    i = grid(BX, cBY, BBX, cBBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                    'print bx,by,bbx,bby, i,""
+                                end if
+                            next cbby
+                        next cby
+                        For CBBX = 1 to 3 'checking box
+                            for CBBY = 1 to 3
+                                if grid(BX, BY, CBBX, CBBY, 0) <> 0 then
+                                    i = grid(BX, BY, CBBX, CBBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                    'print bx,by,bbx,bby, i,""
+                                end if
+                            next CBBY
+                        Next CBBX
+                    End if
+                next BBX
+            next BX
+        next BBY
+    Next BY
+    
+    
+    for by = 1 to 3 'PAIRS ROW
+        for bby = 1 to 3
+            erase occur
+            for poss = 1 to 9
+                i = 1
+                for bx = 1 to 3
+                    for bbx = 1 to 3
+                        if grid(BX,BY,BBX,BBY,poss) <> 0 then
+                            occur(poss,i,1) = bx
+                            occur(poss,i,2) = bbx
+                            count(poss) = i
+                            i = i + 1
+                        end if
+                    next bbx
+                next bx
+            next poss
+            for poss = 1 to 9
+                if count(poss) = 2 then
+                    co1 = occur(poss,1,1) & occur(poss,1,2)
+                    co2 = occur(poss,2,1) & occur(poss,2,2)
+                    for cposs = 1 to 9
+                        if cposs <> poss then
+                            if count(cposs) = 2 then
+                                cco1 = occur(cposs,1,1) & occur(cposs,1,2)
+                                cco2 = occur(cposs,2,1) & occur(cposs,2,2)
+                                if co1 = cco1 and co2 = cco2  then
+                                    for eposs = 1 to 9
+                                        if eposs <> poss and eposs <> cposs then
+                                            grid(occur(cposs,1,1),by,occur(cposs,1,2),bby,eposs) = 0
+                                            grid(occur(cposs,2,1),by,occur(cposs,2,2),bby,eposs) = 0
+                                        end if
+                                    next eposs
+                                end if
+                            end if
+                        end if
+                    next cposs
+                end if
+            next poss
+        next bby
+    next by
+    
+       for BY = 1 to 3
+        for BBY = 1 to 3
+            for BX = 1 to 3
+                for BBX = 1 to 3
+                    h = grid(BX,BY,BBX,BBY,0)
+                    if h <> 0 then
+                        'print "h <> 0"
+                    end if
+                    if h = 0 then
+                        'print "h=0"
+                        'row check
+                        for CBX = 1 to 3 'checking row
+                            for CBBX = 1 to 3
+                                if grid(CBX, BY, CBBX, BBY, 0) <> 0 then
+                                    i = grid(CBX, BY, CBBX, BBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                    'print bx,by,bbx,bby, i,""
+                                end if
+                            next cbbx
+                        next cbx
+                        for CBy = 1 to 3 'checking column
+                            for CBBy = 1 to 3
+                                if grid(BX, cBY, BBX, cBBY, 0) <> 0 then
+                                    i = grid(BX, cBY, BBX, cBBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                    'print bx,by,bbx,bby, i,""
+                                end if
+                            next cbby
+                        next cby
+                        For CBBX = 1 to 3 'checking box
+                            for CBBY = 1 to 3
+                                if grid(BX, BY, CBBX, CBBY, 0) <> 0 then
+                                    i = grid(BX, BY, CBBX, CBBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                    'print bx,by,bbx,bby, i,""
+                                end if
+                            next CBBY
+                        Next CBBX
+                    End if
+                next BBX
+            next BX
+        next BBY
+    Next BY
+    
+
+    for bx = 1 to 3 'PAIRS COL
+        for bbx = 1 to 3
+            erase occur
+            for poss = 1 to 9
+                i = 1
+                for by = 1 to 3
+                    for bby = 1 to 3
+                        if grid(BX,BY,BBX,BBY,poss) <> 0 then
+                            occur(poss,i,1) = by
+                            occur(poss,i,2) = bby
+                            count(poss) = i
+                            i = i + 1
+                        end if
+                    next bby
+                next by
+            next poss
+            for poss = 1 to 9
+                if count(poss) = 2 then
+                    co1 = occur(poss,1,1) & occur(poss,1,2)
+                    co2 = occur(poss,2,1) & occur(poss,2,2)
+                    for cposs = 1 to 9
+                        if cposs <> poss then
+                            if count(cposs) = 2 then
+                                cco1 = occur(cposs,1,1) & occur(cposs,1,2)
+                                cco2 = occur(cposs,2,1) & occur(cposs,2,2)
+                                if co1 = cco1 and co2 = cco2  then
+                                    for eposs = 1 to 9
+                                        if eposs <> poss and eposs <> cposs then
+                                            grid(bx,occur(cposs,1,1),bbx,occur(cposs,1,2),eposs) = 0
+                                            grid(bx,occur(cposs,2,1),bbx,occur(cposs,2,2),eposs) = 0
+                                        end if
+                                    next eposs
+                                end if
+                            end if
+                        end if
+                    next cposs
+                end if
+            next poss
+        next bbx
+    next bx
+    
+        for BY = 1 to 3
+        for BBY = 1 to 3
+            for BX = 1 to 3
+                for BBX = 1 to 3
+                    h = grid(BX,BY,BBX,BBY,0)
+                    if h <> 0 then
+                        'print "h <> 0"
+                    end if
+                    if h = 0 then
+                        'print "h=0"
+                        'row check
+                        for CBX = 1 to 3 'checking row
+                            for CBBX = 1 to 3
+                                if grid(CBX, BY, CBBX, BBY, 0) <> 0 then
+                                    i = grid(CBX, BY, CBBX, BBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                    'print bx,by,bbx,bby, i,""
+                                end if
+                            next cbbx
+                        next cbx
+                        for CBy = 1 to 3 'checking column
+                            for CBBy = 1 to 3
+                                if grid(BX, cBY, BBX, cBBY, 0) <> 0 then
+                                    i = grid(BX, cBY, BBX, cBBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                    'print bx,by,bbx,bby, i,""
+                                end if
+                            next cbby
+                        next cby
+                        For CBBX = 1 to 3 'checking box
+                            for CBBY = 1 to 3
+                                if grid(BX, BY, CBBX, CBBY, 0) <> 0 then
+                                    i = grid(BX, BY, CBBX, CBBY, 0)
+                                    grid(BX,BY,BBX,BBY,i) = 0
+                                    'print bx,by,bbx,bby, i,""
+                                end if
+                            next CBBY
+                        Next CBBX
+                    End if
+                next BBX
+            next BX
+        next BBY
+    Next BY
+    
+    
+    for BY = 1 to 3 'move single answers to front
+        for BBY = 1 to 3
+            for BX = 1 to 3
+                for BBX = 1 to 3
+                    curnum = 0
+                    zerocount = 0
+                    for poss = 0 to 9
+                        if grid(BX,BY,BBX,BBY,poss) = 0 then
+                            zerocount = zerocount + 1
+                        end if
+                        if grid(BX,BY,BBX,BBY,poss) <> 0 then
+                            curnum = grid(BX,BY,BBX,BBY,poss)
+                        end if
+                    next poss
+                    if zerocount = 9 then
+                        grid(bx,by,bbx,bby,curnum) = 0
+                        grid(BX,BY,BBX,BBY,0) = curnum
+                    end if
+                next BBX
+            next BX
+        next BBY
+    Next BY
+    
+    if udev = 1 then
+        for BY = 1 to 3 'gridraw
+            for BBY = 1 to 3
+                for BX = 1 to 3        
+                    for BBX = 1 to 3
+                        for poss = 0 to 9
+                            print grid(BX,BY,BBX,BBY,poss);
+                        next poss
+                        print " |";
+                    next BBX
+                    print "|";
+                next BX
+                print ""
+            next BBY
+            print "---------"
+        Next BY
+
+        
+        for BY = 1 to 3 'gridclean
+            for BBY = 1 to 3
+                for BX = 1 to 3
+                    for BBX = 1 to 3
+                        for poss = 0 to 9
+                            h = grid(BX,BY,BBX,BBY,poss)
+                            if h <> 0 then
+                                print grid(BX,BY,BBX,BBY,poss);
+                            end if
+                        next poss
+                        print "|";
+                    next BBX
+                    print "|";
+                next BX
+                print ""
+            next BBY
+            print "---------"
+        Next BY
+        
+        for BY = 1 to 3 'print answers clean
+            for BBY = 1 to 3
+                for BX = 1 to 3        
+                    for BBX = 1 to 3
+                        if grid(BX,BY,BBX,BBY,0) = 0 then
+                            print "  ";
+                        end if
+                        if grid(bX,bY,bbX,bbY,0) <> 0 then
+                            for poss = 0 to 9
+                                if grid(BX,BY,BBX,BBY,poss) <> 0 then
+                                    print grid(BX,BY,BBX,BBY,poss);
+                                end if 
+                            next poss
+                        end if
+                        print "|";
+                    next BBX
+                    print "|";
+                next BX
+                print ""
+            next BBY
+            print "---------"
+        Next BY
+    end if
+    answercount = 0 'count answers
+    for BY = 1 to 3
+        for BBY = 1 to 3
+            for BX = 1 to 3        
+                for BBX = 1 to 3
+                    if grid(BX,BY,BBX,BBY,0) <> 0 then
+                        answercount = answercount + 1
+                    end if
+                next BBX
+            next BX
+        next BBY
+    Next BY
+    print "found ";answercount;"/81 answers"
+    if answercount = 81 then
+        running = 0
+    end if
+    if udev = 1 then
+        sleep
+    end if
+    ran = ran + 1
+    if ran = 10 then
+        running = 0
+    end if
+wend
+
+    for BY = 1 to 3 'print answers clean
+        for BBY = 1 to 3
+            for BX = 1 to 3        
+                for BBX = 1 to 3
+                    if grid(BX,BY,BBX,BBY,0) = 0 then
+                        print "  ";
+                    end if
+                    if grid(bX,bY,bbX,bbY,0) <> 0 then
+                        for poss = 0 to 9
+                            if grid(BX,BY,BBX,BBY,poss) <> 0 then
+                                print grid(BX,BY,BBX,BBY,poss);
+                            end if 
+                        next poss
+                    end if
+                    print "|";
+                next BBX
+                print "|";
+            next BX
+            print ""
+        next BBY
+        print "---------"
+    Next BY
+    
+    if ran = 10 then
+        print ""
+        print ""
+        print"was unable to find answer, here is as far as it got"
+        for BY = 1 to 3 'gridclean
+            for BBY = 1 to 3
+                for BX = 1 to 3
+                    for BBX = 1 to 3
+                        for poss = 0 to 9
+                            h = grid(BX,BY,BBX,BBY,poss)
+                            if h <> 0 then
+                                print grid(BX,BY,BBX,BBY,poss);
+                            end if
+                        next poss
+                        print "|";
+                    next BBX
+                    print "|";
+                next BX
+                print ""
+            next BBY
+            print "---------"
+        Next BY
+    end if
+    
+
+sleep
